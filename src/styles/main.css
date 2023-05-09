@@ -1,0 +1,43 @@
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+}
+
+#__next {
+  height: 100%;
+}
+
+.button-drawer {
+  position: absolute;
+  z-index: 2;
+  margin: 16px;
+}
+
+.drawer-location-search .ant-list-item {
+  padding: 0;
+}
+
+.drawer-location-search .ant-spin-container .ant-row {
+  gap: 8px;
+}
+
+.drawer-location-search .list-item {
+  padding: 8px;
+}
+
+.drawer-location-search .list-item:hover {
+  background-color: #ededed;
+  border-radius: 100px;
+}
+
+.ant-drawer-body {
+  padding-top: 12px !important;
+}
+
+.use-pointer {
+  cursor: pointer;
+}
