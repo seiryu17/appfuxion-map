@@ -30,7 +30,6 @@ interface IProps {
   ClearListPlaces: (type: GROUP_MAP.LIST_SUGGESTED) => void;
   SetLangLat: (location: ILocation) => Promise<any>;
   setZoom: (value: number) => void;
-  AddDummyToListPlaces: (list: any, type: GROUP_MAP.LIST_SUGGESTED) => void;
 }
 
 const LocationSearchDrawer = (props: IProps) => {
@@ -42,7 +41,6 @@ const LocationSearchDrawer = (props: IProps) => {
     ClearListPlaces,
     SetLangLat,
     setZoom,
-    AddDummyToListPlaces,
   } = props;
   const [autocomplete, setAutocomplete] = useState<any>();
   const [options, setOptions] = useState<IMap[]>(
@@ -52,51 +50,14 @@ const LocationSearchDrawer = (props: IProps) => {
   const searchVal = useDebounce(search, 500);
   const [valueRadio, setValueRadio] = useState(1);
 
-  const addDummy = () => {
-    return (
-      AddDummyToListPlaces(DUMMY_DATA, GROUP_MAP.LIST_SUGGESTED),
-      setOptions(
-        DUMMY_DATA.predictions.map((x: any) => {
-          return { value: x.description, key: x.place_id };
-        })
-      )
-    );
-  };
-
   const clearList = () => {
     ClearListPlaces(GROUP_MAP.LIST_SUGGESTED);
     setOptions([]);
   };
 
-  useEffect(() => {
-    if (search) {
-      if (valueRadio === 1) {
-      } else {
-        let matches = stringSimilarity.findBestMatch(
-          searchVal,
-          DUMMY_DATA.predictions.map((x) => x.description.toLowerCase())
-        );
-        let bestMatches = matches.ratings.filter((x: any) => x.rating > 0.1);
-        let data: IMap[] = [];
-        bestMatches.map((x) => {
-          return DUMMY_DATA.predictions.map((xx) => {
-            if (xx.description.toLowerCase() === x.target)
-              return data.push({ value: xx.description, key: xx.place_id });
-          });
-        });
-        setOptions(data);
-      }
-    } else if (search === "" && valueRadio === 1) {
-      clearList();
-    } else if (search === "" && valueRadio === 2) {
-      addDummy();
-    }
-  }, [searchVal]);
-
   const onChangeRadio = (e: RadioChangeEvent) => {
     setSearch(""), setValueRadio(e.target.value);
     if (e.target.value === 2) {
-      addDummy();
     } else {
       clearList();
     }
@@ -135,7 +96,6 @@ const LocationSearchDrawer = (props: IProps) => {
           <Row style={{ width: "100%" }} justify="space-between">
             <Radio.Group onChange={onChangeRadio} value={valueRadio}>
               <Radio value={1}>API</Radio>
-              <Radio value={2}>Fake Static Data</Radio>
             </Radio.Group>
             <CloseOutlined
               className="use-pointer"

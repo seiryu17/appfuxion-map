@@ -10,6 +10,7 @@ import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { SearchOutlined } from "@ant-design/icons";
 import LocationSearchDrawer from "../src/component/drawer/location-search";
 import ILocation from "../src/interfaces/models/location";
+import ILatLng from "../src/interfaces/map-center";
 
 interface IProps {
   map: IMapState;
@@ -19,7 +20,6 @@ interface IProps {
   ) => Promise<any>;
   AddHistory: (data: IMap, type: GROUP_MAP.HISTORY) => void;
   ClearListPlaces: (type: GROUP_MAP.LIST_SUGGESTED) => void;
-  AddDummyToListPlaces: (list: any, type: GROUP_MAP.LIST_SUGGESTED) => void;
   SetLangLat: (location: ILocation) => Promise<any>;
 }
 
@@ -29,8 +29,7 @@ const containerStyle = {
 };
 
 const Home = (props: IProps) => {
-  const { map, AddHistory, ClearListPlaces, SetLangLat, AddDummyToListPlaces } =
-    props;
+  const { map, AddHistory, ClearListPlaces, SetLangLat } = props;
   const [libraries] = useState<Array<"drawing" | "places" | "geometry">>([
     "places",
   ]);
@@ -58,7 +57,6 @@ const Home = (props: IProps) => {
         SetLangLat={SetLangLat}
         setZoom={setZoom}
         onClose={() => setVisible(false)}
-        AddDummyToListPlaces={AddDummyToListPlaces}
       />
       <Button
         className="button-drawer"
@@ -75,11 +73,11 @@ const Home = (props: IProps) => {
       >
         <GoogleMap
           mapContainerStyle={containerStyle}
-          center={(map.data as any) || currentloc}
+          center={(map.data as unknown as ILatLng) || currentloc}
           zoom={zoom}
           options={{ mapTypeControl: false, streetViewControl: false }}
         >
-          <Marker position={(map.data as any) || currentloc} />
+          <Marker position={(map.data as unknown as ILatLng) || currentloc} />
         </GoogleMap>
       </LoadScript>
     </>
@@ -97,8 +95,6 @@ const mapDispatchToProps = (dispatch: any) => ({
     dispatch(Actions.Map.AddHistory(data, type)),
   ClearListPlaces: (type: GROUP_MAP.LIST_SUGGESTED) =>
     dispatch(Actions.Map.ClearListPlaces(type)),
-  AddDummyToListPlaces: (list: any, type: GROUP_MAP.LIST_SUGGESTED) =>
-    dispatch(Actions.Map.AddDummyToListPlaces(list, type)),
   SetLangLat: (location: ILocation) =>
     dispatch(Actions.Map.SetLangLat(location)),
 });
