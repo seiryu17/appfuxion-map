@@ -5,6 +5,7 @@ import Base from "./base";
 import Api from "../api";
 import GROUP_MAP from "../../constant/group-map";
 import IHistory from "../../interfaces/models/map";
+import ILocation from "../../interfaces/models/location";
 
 const AddHistory =
   (data: IHistory, type?: GROUP_MAP.HISTORY) =>
@@ -43,6 +44,14 @@ const GetLangLat = (place_id: string) => (dispatch: Dispatch<AnyAction>) => {
   );
 };
 
+const SetLangLat =
+  (location: ILocation) =>
+  (dispatch: Dispatch<AnyAction>) => {
+    dispatch(
+      action(ActionTypes.Map.GET_LAT_LANG_SUCCESS, { data: location })
+    );
+  };
+
 const GetListPlaces =
   (input: string, type?: GROUP_MAP.LIST_SUGGESTED) =>
   (dispatch: Dispatch<AnyAction>) => {
@@ -78,5 +87,6 @@ export default {
   ClearListPlaces,
   AddDummyToListPlaces,
   GetLangLat,
+  SetLangLat,
   GetListPlaces,
 };

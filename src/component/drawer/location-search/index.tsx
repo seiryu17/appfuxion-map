@@ -4,7 +4,6 @@ import {
   CloseOutlined,
 } from "@ant-design/icons";
 import {
-  AutoComplete,
   Col,
   Drawer,
   List,
@@ -20,18 +19,16 @@ import IMap from "../../../interfaces/models/map";
 import IMapState from "../../../interfaces/states/map";
 import useDebounce from "../../../utils/debounce";
 import stringSimilarity from "string-similarity";
+import { Autocomplete } from "@react-google-maps/api";
+import ILocation from "../../../interfaces/models/location";
 
 interface IProps {
   visible: boolean;
   map: IMapState;
   onClose: () => void;
-  GetListPlaces: (
-    input: string,
-    type: GROUP_MAP.LIST_SUGGESTED
-  ) => Promise<any>;
   AddHistory: (data: IMap, type: GROUP_MAP.HISTORY) => void;
   ClearListPlaces: (type: GROUP_MAP.LIST_SUGGESTED) => void;
-  GetLangLat: (place_id: string) => Promise<any>;
+  SetLangLat: (location: ILocation) => Promise<any>;
   setZoom: (value: number) => void;
   AddDummyToListPlaces: (list: any, type: GROUP_MAP.LIST_SUGGESTED) => void;
 }
@@ -41,13 +38,13 @@ const LocationSearchDrawer = (props: IProps) => {
     visible,
     onClose,
     map,
-    GetListPlaces,
     AddHistory,
     ClearListPlaces,
-    GetLangLat,
+    SetLangLat,
     setZoom,
     AddDummyToListPlaces,
   } = props;
+  const [autocomplete, setAutocomplete] = useState<any>();
   const [options, setOptions] = useState<IMap[]>(
     map.groupedList[GROUP_MAP.LIST_SUGGESTED]?.list || []
   );
@@ -74,17 +71,6 @@ const LocationSearchDrawer = (props: IProps) => {
   useEffect(() => {
     if (search) {
       if (valueRadio === 1) {
-        GetListPlaces(
-          (searchVal || "").toLowerCase(),
-          GROUP_MAP.LIST_SUGGESTED
-        ).then((res) => {
-          if (res.data)
-            setOptions(
-              res.data.predictions.map((x: any) => {
-                return { value: x.description, key: x.place_id };
-              })
-            );
-        });
       } else {
         let matches = stringSimilarity.findBestMatch(
           searchVal,
@@ -116,6 +102,32 @@ const LocationSearchDrawer = (props: IProps) => {
     }
   };
 
+  const onLoad = (value: any) => {
+    setAutocomplete(value);
+  };
+
+  const onPlaceChanged = () => {
+    const res = autocomplete.getPlace();
+
+    setSearch(res.formatted_address), onClose();
+    (map.list || [])?.filter((x) => x.value === res.formatted_address).length <
+      1 &&
+      AddHistory(
+        {
+          key: res.place_id,
+          value: res.formatted_address,
+          lat: res.geometry.location.lat(),
+          lng: res.geometry.location.lng(),
+        },
+        GROUP_MAP.HISTORY
+      ),
+      SetLangLat({
+        lat: res.geometry.location.lat(),
+        lng: res.geometry.location.lng(),
+      });
+    setZoom(16);
+  };
+
   return (
     <Drawer
       title={
@@ -131,7 +143,7 @@ const LocationSearchDrawer = (props: IProps) => {
               onClick={() => onClose()}
             />
           </Row>
-          <AutoComplete
+          {/* <AutoComplete
             options={options}
             value={search}
             className="autocomplete-textbox"
@@ -143,11 +155,30 @@ const LocationSearchDrawer = (props: IProps) => {
               onClose(),
               (map.list || [])?.filter((x) => x.value === data).length < 1 &&
                 AddHistory(option, GROUP_MAP.HISTORY),
-              GetLangLat(option.key),
+              SetLangLat(option.key),
               setZoom(16)
             )}
             placeholder="Input location here"
-          />
+          /> */}
+          <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
+            <input
+              type="text"
+              placeholder="Input location here"
+              style={{
+                boxSizing: `border-box`,
+                border: `1px solid transparent`,
+                width: `100%`,
+                marginTop: `10px`,
+                height: `32px`,
+                padding: `0 12px`,
+                borderRadius: `3px`,
+                boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
+                fontSize: `14px`,
+                outline: `none`,
+                textOverflow: `ellipses`,
+              }}
+            />
+          </Autocomplete>
         </>
       }
       className="drawer-location-search"
@@ -169,7 +200,14 @@ const LocationSearchDrawer = (props: IProps) => {
         renderItem={(t) => (
           <Row
             className="list-item use-pointer"
-            onClick={() => (setSearch(t.value), GetLangLat(t.key), onClose())}
+            onClick={() => (
+              setSearch(t.value),
+              SetLangLat({
+                lat: t.lat || "",
+                lng: t.lng || "",
+              }),
+              onClose()
+            )}
             gutter={8}
             wrap={false}
           >

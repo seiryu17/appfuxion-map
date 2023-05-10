@@ -239,6 +239,13 @@
   dependencies:
     tslib "^2.4.0"
 
+"@types/google-map-react@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.npmjs.org/@types/google-map-react/-/google-map-react-2.1.7.tgz"
+  integrity sha512-7pquMUU20kVwbfEV91iAWXjApSkqoODkfUwTSmJpU9Tgd+ecX+MrQnplCqrSqKrPF1VjfvyWnDEicdoSd0G5qA==
+  dependencies:
+    "@types/react" "*"
+
 "@types/google.maps@3.50.5":
   version "3.50.5"
   resolved "https://registry.npmjs.org/@types/google.maps/-/google.maps-3.50.5.tgz"

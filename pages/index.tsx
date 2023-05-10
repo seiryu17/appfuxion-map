@@ -9,6 +9,7 @@ import { ReduxState } from "../src/store/reducers";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { SearchOutlined } from "@ant-design/icons";
 import LocationSearchDrawer from "../src/component/drawer/location-search";
+import ILocation from "../src/interfaces/models/location";
 
 interface IProps {
   map: IMapState;
@@ -19,7 +20,7 @@ interface IProps {
   AddHistory: (data: IMap, type: GROUP_MAP.HISTORY) => void;
   ClearListPlaces: (type: GROUP_MAP.LIST_SUGGESTED) => void;
   AddDummyToListPlaces: (list: any, type: GROUP_MAP.LIST_SUGGESTED) => void;
-  GetLangLat: (place_id: string) => Promise<any>;
+  SetLangLat: (location: ILocation) => Promise<any>;
 }
 
 const containerStyle = {
@@ -28,14 +29,11 @@ const containerStyle = {
 };
 
 const Home = (props: IProps) => {
-  const {
-    map,
-    GetListPlaces,
-    AddHistory,
-    ClearListPlaces,
-    GetLangLat,
-    AddDummyToListPlaces,
-  } = props;
+  const { map, AddHistory, ClearListPlaces, SetLangLat, AddDummyToListPlaces } =
+    props;
+  const [libraries] = useState<Array<"drawing" | "places" | "geometry">>([
+    "places",
+  ]);
 
   const [visible, setVisible] = useState(false);
   const [currentloc, setCurrentLoc] = useState({ lat: 0, lng: 0 });
@@ -55,10 +53,9 @@ const Home = (props: IProps) => {
       <LocationSearchDrawer
         map={map}
         visible={visible}
-        GetListPlaces={GetListPlaces}
         AddHistory={AddHistory}
         ClearListPlaces={ClearListPlaces}
-        GetLangLat={GetLangLat}
+        SetLangLat={SetLangLat}
         setZoom={setZoom}
         onClose={() => setVisible(false)}
         AddDummyToListPlaces={AddDummyToListPlaces}
@@ -72,7 +69,10 @@ const Home = (props: IProps) => {
       >
         Search Location
       </Button>
-      <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_BASE_API || ""}>
+      <LoadScript
+        libraries={libraries}
+        googleMapsApiKey={process.env.NEXT_PUBLIC_BASE_API || ""}
+      >
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={(map.data as any) || currentloc}
@@ -99,7 +99,8 @@ const mapDispatchToProps = (dispatch: any) => ({
     dispatch(Actions.Map.ClearListPlaces(type)),
   AddDummyToListPlaces: (list: any, type: GROUP_MAP.LIST_SUGGESTED) =>
     dispatch(Actions.Map.AddDummyToListPlaces(list, type)),
-  GetLangLat: (place_id: string) => dispatch(Actions.Map.GetLangLat(place_id)),
+  SetLangLat: (location: ILocation) =>
+    dispatch(Actions.Map.SetLangLat(location)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

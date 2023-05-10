@@ -2,6 +2,7 @@ import { Provider } from "react-redux";
 import { wrapper } from "../src/store";
 
 import "../src/styles/main.css";
+import React from "react";
 
 function App({ Component, pageProps, ...rest }: any) {
   const { store } = wrapper.useWrappedStore(rest);
@@ -12,4 +13,4 @@ function App({ Component, pageProps, ...rest }: any) {
   );
 }
 
-export default App;
+export default React.memo(App);
